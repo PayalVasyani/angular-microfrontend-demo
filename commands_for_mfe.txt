@@ -1,5 +1,19 @@
 Set Up Microfrontend in Angular With Module Federation
 
+Angular Microfrontend Demo
+
+Apps
+- Shell (Host)
+- Product (Remote)
+- Account (Remote)
+
+Tech
+Angular 19
+Module Federation
+Webpack
+
+Start from here
+
 npx -p @angular/cli@19.2.22 ng new mfe-demo19 --create-application false --skip-git --package-manager npm
 
 npx -p @angular/cli@19.2.22 ng new application shell --routing --style=scss --skip-tests
