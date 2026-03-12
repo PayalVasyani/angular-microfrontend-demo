@@ -1,0 +1,52 @@
+Set Up Microfrontend in Angular With Module Federation
+
+npx -p @angular/cli@19.2.22 ng new mfe-demo19 --create-application false --skip-git --package-manager npm
+
+npx -p @angular/cli@19.2.22 ng new application shell --routing --style=scss --skip-tests
+npx -p @angular/cli@19.2.22 ng new application product --routing --style=scss --skip-tests
+npx -p @angular/cli@19.2.22 ng new application account --routing --style=scss --skip-tests
+
+npm i @angular-architects/module-federation@19.0.3
+
+npx -p @angular/cli@19.2.22 ng g @angular-architects/module-federation:init-webpack --project shell --type host --port 4200 --skip-confirmation
+npx -p @angular/cli@19.2.22 ng g @angular-architects/module-federation:init-webpack --project product --type remote --port 4201 --skip-confirmation
+npx -p @angular/cli@19.2.22 ng g @angular-architects/module-federation:init-webpack --project account --type remote --port 4202 --skip-confirmation
+
+Fix host remotes in projects/shell/webpack.config.js
+remotes: {
+    product: 'http://localhost:4201/remoteEntry.js',
+    account: 'http://localhost:4202/remoteEntry.js'
+}
+
+In shell app.routes.ts
+
+import { loadRemoteModule } from '@angular-architects/module-federation';
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+    { 
+        path: 'product', 
+        loadComponent: () => loadRemoteModule({
+            type: 'module',
+            remoteEntry: 'http://localhost:4201/remoteEntry.js',
+            exposedModule: './Component'
+        }).then(m => m.AppComponent),   
+    },
+    { 
+        path: 'account', 
+        loadComponent: () => loadRemoteModule({
+            type: 'module',
+            remoteEntry: 'http://localhost:4202/remoteEntry.js',
+            exposedModule: './Component'
+        }).then(m => m.AppComponent),   
+    },
+    { path : '', redirectTo: 'product', pathMatch: 'full' },
+];
+
+Run all 3 apps together
+npm run run:all -- shell product account
+Test
+http://localhost:4200/product
+http://localhost:4200/account
+
+ng g library shared-ui
